@@ -5,12 +5,20 @@ import { images } from "@/constants";
 import SearchInput from "@/components/SearchInput";
 import Trending from "@/components/Trending";
 import EmptyState from "@/components/EmptyState";
-import { getAllPosts } from "@/lib/appwrite";
+import { getAllPosts, getLatestPosts } from "@/lib/appwrite";
 import useAppWrite from "@/lib/useAppwrite";
 import VideoCard from "@/components/VideoCard";
 
 const Home = () => {
-  const { data, isLoading, refetch } = useAppWrite(getAllPosts);
+  const {
+    data: posts,
+    isLoading: postLoading,
+    refetch,
+  } = useAppWrite(getAllPosts);
+  const { data: latestPosts, isLoading: latestLoading } =
+    useAppWrite(getLatestPosts);
+
+  const isLoading = postLoading || latestLoading;
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -19,14 +27,10 @@ const Home = () => {
     refetch();
     setIsRefreshing(false);
   };
-
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
   return (
     <SafeAreaView className="bg-primary h-full">
       <FlatList
-        data={data}
+        data={posts}
         keyExtractor={(video) => video.$id}
         renderItem={({ item }) => <VideoCard video={item} />}
         ListHeaderComponent={() => (
@@ -54,7 +58,7 @@ const Home = () => {
                 Latest Videos
               </Text>
 
-              <Trending posts={[{ id: 1 }, { id: 3 }] ?? []} />
+              <Trending posts={latestPosts} />
             </View>
           </View>
         )}
