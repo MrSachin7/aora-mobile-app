@@ -85,7 +85,7 @@ const Trending = ({ posts }: TrendingProps) => {
   }: {
     viewableItems: Array<{ key: string }>;
   }) => {
-    setActiveItem(viewableItems[0].key);
+    setActiveItem(viewableItems[0]?.key);
   };
 
   return (
