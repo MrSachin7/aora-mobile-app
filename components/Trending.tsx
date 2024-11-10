@@ -43,7 +43,7 @@ const TrendingItem = ({ activeItemId, item }: any) => {
       {play ? (
         <Video
           source={{
-            uri: "http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4",
+            uri: item.video,
           }}
           className="w-52 h-72 rounded-[35px] mt-3 bg-white/10"
           resizeMode={ResizeMode.CONTAIN}
