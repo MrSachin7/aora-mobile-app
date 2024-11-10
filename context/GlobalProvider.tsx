@@ -10,7 +10,7 @@ export const useGlobalContext = () => {
 };
 
 const GlobalProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setisLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<null | Models.Document>(null);
   const [isLoading, setisLoading] = useState(true);
 
@@ -18,11 +18,11 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
     getCurrentUser()
       .then((res) => {
         if (!res) {
-          setisLoggedIn(false);
+          setIsLoggedIn(false);
           setUser(null);
           return;
         }
-        setisLoggedIn(true);
+        setIsLoggedIn(true);
         setUser(res);
       })
       .catch(() => {
@@ -36,7 +36,7 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <GlobalContext.Provider
-      value={{ isLoggedIn, setisLoggedIn, user, setUser, isLoading }}
+      value={{ isLoggedIn, setIsLoggedIn, user, setUser, isLoading }}
     >
       {children}
     </GlobalContext.Provider>

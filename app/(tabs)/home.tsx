@@ -8,8 +8,11 @@ import EmptyState from "@/components/EmptyState";
 import { getAllPosts, getLatestPosts } from "@/lib/appwrite";
 import useAppWrite from "@/lib/useAppwrite";
 import VideoCard from "@/components/VideoCard";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const Home = () => {
+  const { user } = useGlobalContext();
+
   const {
     data: posts,
     isLoading: postLoading,
@@ -17,9 +20,6 @@ const Home = () => {
   } = useAppWrite(getAllPosts);
   const { data: latestPosts, isLoading: latestLoading } =
     useAppWrite(getLatestPosts);
-
-  const isLoading = postLoading || latestLoading;
-
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const onRefresh = () => {
@@ -41,7 +41,7 @@ const Home = () => {
                   Welcome back
                 </Text>
                 <Text className="text-2xl font-psemibold text-white">
-                  JSMastery
+                  {user?.username}
                 </Text>
               </View>
               <View className="mt-1.5">
@@ -52,7 +52,7 @@ const Home = () => {
                 />
               </View>
             </View>
-            <SearchInput placeholder="Search for a video topic" />
+            <SearchInput />
             <View className="w-full flex-1 pt-5 pb-8">
               <Text className="text-gray-100 text-lg font-pregular mb-3">
                 Latest Videos

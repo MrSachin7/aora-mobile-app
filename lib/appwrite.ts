@@ -4,7 +4,9 @@ import {
   Client,
   Databases,
   ID,
+  ImageGravity,
   Query,
+  Storage,
 } from "react-native-appwrite";
 
 export const appwriteConfig = {
@@ -33,6 +35,7 @@ client.setEndpoint(endpoint).setProject(projectId).setPlatform(platform);
 const account = new Account(client);
 const avatars = new Avatars(client);
 const databases = new Databases(client);
+const storage = new Storage(client);
 
 export const createUser = async (
   email: string,
@@ -116,6 +119,121 @@ export const getLatestPosts = async () => {
       Query.limit(7),
     ]);
     return posts.documents;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const searchPosts = async (query: string) => {
+  try {
+    const posts = await databases.listDocuments(databaseId, videoCollectionId, [
+      Query.search("title", query),
+    ]);
+    return posts.documents;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const getUserPosts = async (userId: string) => {
+  try {
+    const posts = await databases.listDocuments(databaseId, videoCollectionId, [
+      Query.equal("creator", userId),
+    ]);
+    return posts.documents;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  try {
+    return await account.deleteSession("current");
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const getFilePreview = async (
+  fileId: string,
+  type: "image" | "video"
+) => {
+  let fileurl;
+  try {
+    if (type === "image") {
+      fileurl = await storage.getFilePreview(
+        storageId,
+        fileId,
+        2000,
+        2000,
+        ImageGravity.Top,
+        100
+      );
+    } else if (type === "video") {
+      fileurl = await storage.getFileView(storageId, fileId);
+    }
+
+    if (!fileurl) throw new Error("Failed to get file preview");
+    return fileurl;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const uploadFile = async (file: any, type: any) => {
+  if (!file) return;
+
+  const asset = {
+    name: file.fileName ?? ID.unique(),
+    type: file.mimeType,
+    size: file.fileSize,
+    uri: file.uri,
+  };
+
+  console.log(file);
+  console.log(asset);
+
+  try {
+    const uploadedFile = await storage.createFile(
+      storageId,
+      ID.unique(),
+      asset
+    );
+    const fileUrl = await getFilePreview(uploadedFile.$id, type);
+
+    return fileUrl;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const uploadVideo = async (form: any) => {
+  try {
+    const [thumbnailUrl, videoUrl] = await Promise.all([
+      uploadFile(form.thumbnail, "image"),
+      uploadFile(form.video, "video"),
+    ]);
+
+    const newPost = await databases.createDocument(
+      databaseId,
+      videoCollectionId,
+      ID.unique(),
+      {
+        title: form.title,
+        thumbnail: thumbnailUrl,
+        video: videoUrl,
+        prompt: form.prompt,
+        creator: form.userId,
+      }
+    );
+
+    return newPost;
   } catch (error) {
     console.log(error);
     throw error;
